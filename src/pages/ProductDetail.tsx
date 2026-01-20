@@ -22,11 +22,25 @@ const ProductDetail = () => {
       try {
         setIsLoading(true);
         console.log('Fetching product with ID:', id);
+        console.log('API Client Base URL:', apiClient.baseUrl);
+        console.log('API Client Base Image URL:', apiClient.baseImageUrl);
+        
         const response = await apiClient.getProduct(id!);
         console.log('Product response:', response);
-        setProduct(response.data.product);
+        
+        if (response.data && response.data.product) {
+          console.log('Setting product:', response.data.product);
+          setProduct(response.data.product);
+        } else {
+          console.error('Unexpected response structure:', response);
+          setProduct(null);
+        }
       } catch (error) {
         console.error('Failed to fetch product:', error);
+        if (error instanceof Error) {
+          console.error('Error message:', error.message);
+          console.error('Error stack:', error.stack);
+        }
         setProduct(null);
       } finally {
         setIsLoading(false);
