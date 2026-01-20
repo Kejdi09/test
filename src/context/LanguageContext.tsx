@@ -7,6 +7,20 @@ interface Translations {
   brandTagline: string;
   home: string;
   shop: string;
+  apparel: string;
+  tShirts: string;
+  hoodies: string;
+  workwearUniforms: string;
+  babyKidsClothing: string;
+  homeDecor: string;
+  embroideredFrames: string;
+  kidsFrames: string;
+  cushions: string;
+  wallDecor: string;
+  towels: string;
+  napkins: string;
+  businessEmbroidery: string;
+  businessLogoEmbroidery: string;
   dresses: string;
   tops: string;
   skirts: string;
@@ -164,6 +178,20 @@ const translations: Record<Language, Translations> = {
     brandTagline: 'Veshjet e qeshtmë në secilin qepje',
     home: 'Kryefaqja',
     shop: 'Dyqani',
+    apparel: 'Veshje',
+    tShirts: 'Bluza',
+    hoodies: 'Hoodies',
+    workwearUniforms: 'Uniforma Pune',
+    babyKidsClothing: 'Rroba për Foshnje & Fëmijë',
+    homeDecor: 'Dekor & Shtëpi',
+    embroideredFrames: 'Korniza të Qendisura',
+    kidsFrames: 'Korniza për Fëmijë',
+    cushions: 'Jastëkë',
+    wallDecor: 'Dekor Muri',
+    towels: 'Peshqirë',
+    napkins: 'Peceta',
+    businessEmbroidery: 'Qendistje Biznesi',
+    businessLogoEmbroidery: 'Qendistje Logo Biznesi',
     dresses: 'Fustanet',
     tops: 'Bluzat',
     skirts: 'Skirtat',
@@ -320,6 +348,20 @@ const translations: Record<Language, Translations> = {
     brandTagline: 'Fine embroidery in every stitch',
     home: 'Home',
     shop: 'Shop',
+    apparel: 'Apparel',
+    tShirts: 'T-Shirts',
+    hoodies: 'Hoodies',
+    workwearUniforms: 'Workwear Uniforms',
+    babyKidsClothing: 'Baby & Kids Clothing (Bodysuits)',
+    homeDecor: 'Home & Decor',
+    embroideredFrames: 'Embroidered Frames',
+    kidsFrames: 'Kids Frames',
+    cushions: 'Cushions',
+    wallDecor: 'Wall Decor',
+    towels: 'Towels',
+    napkins: 'Napkins',
+    businessEmbroidery: 'Business Embroidery',
+    businessLogoEmbroidery: 'Business Logo Embroidery',
     dresses: 'Dresses',
     tops: 'Tops',
     skirts: 'Skirts',
@@ -476,6 +518,20 @@ const translations: Record<Language, Translations> = {
     brandTagline: 'Fine broderie dans chaque couture',
     home: 'Accueil',
     shop: 'Boutique',
+    apparel: 'Vêtements',
+    tShirts: 'T-Shirts',
+    hoodies: 'Hoodies',
+    workwearUniforms: 'Uniformes de Travail',
+    babyKidsClothing: 'Vêtements Bébé & Enfants (Bodies)',
+    homeDecor: 'Maison & Décor',
+    embroideredFrames: 'Cadres Brodés',
+    kidsFrames: 'Cadres Enfants',
+    cushions: 'Coussins',
+    wallDecor: 'Décor Murale',
+    towels: 'Serviettes',
+    napkins: 'Nappes Serviettes',
+    businessEmbroidery: 'Broderie pour Entreprises',
+    businessLogoEmbroidery: 'Broderie de Logo',
     dresses: 'Robes',
     tops: 'Chemises',
     skirts: 'Jupes',

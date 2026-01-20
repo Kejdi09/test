@@ -58,10 +58,11 @@ const Footer = () => {
             <h3 className="font-display text-lg mb-4">{t.quickLinks}</h3>
             <ul className="space-y-3 font-body text-sm">
               <li><Link to="/shop" className="text-background/70 hover:text-accent transition-colors">{t.shopAll}</Link></li>
-              <li><Link to="/shop?category=abayas" className="text-background/70 hover:text-accent transition-colors">{t.abayas}</Link></li>
-              <li><Link to="/shop?category=hijabs" className="text-background/70 hover:text-accent transition-colors">{t.hijabs}</Link></li>
-              <li><Link to="/shop?category=kaftans" className="text-background/70 hover:text-accent transition-colors">{t.kaftans}</Link></li>
-              <li><Link to="/shop?category=prayer" className="text-background/70 hover:text-accent transition-colors">{t.prayerWear}</Link></li>
+              <li><Link to="/shop?category=apparel" className="text-background/70 hover:text-accent transition-colors">{t.apparel}</Link></li>
+              <li><Link to="/shop?category=t-shirts" className="text-background/70 hover:text-accent transition-colors">{t.tShirts}</Link></li>
+              <li><Link to="/shop?category=hoodies" className="text-background/70 hover:text-accent transition-colors">{t.hoodies}</Link></li>
+              <li><Link to="/shop?category=home-decor" className="text-background/70 hover:text-accent transition-colors">{t.homeDecor}</Link></li>
+              <li><Link to="/shop?category=business-embroidery" className="text-background/70 hover:text-accent transition-colors">{t.businessEmbroidery}</Link></li>
             </ul>
           </div>
 

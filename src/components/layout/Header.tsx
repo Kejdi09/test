@@ -12,10 +12,14 @@ const Header = () => {
 
   const navLinks = [
     { name: t.home, path: '/' },
-    { name: t.shop, path: '/shop' },
-    { name: t.dresses, path: '/shop?category=dresses' },
-    { name: t.tops, path: '/shop?category=tops' },
-    { name: t.about, path: '/about' },
+    { name: t.apparel, path: '/shop?category=apparel' },
+    { name: t.tShirts, path: '/shop?category=t-shirts' },
+    { name: t.hoodies, path: '/shop?category=hoodies' },
+    { name: t.workwearUniforms, path: '/shop?category=workwear-uniforms' },
+    { name: t.babyKidsClothing, path: '/shop?category=baby-kids-bodysuits' },
+    { name: t.homeDecor, path: '/shop?category=home-decor' },
+    { name: t.businessEmbroidery, path: '/shop?category=business-embroidery' },
+    { name: t.businessLogoEmbroidery, path: '/shop?category=business-logo-embroidery' },
     { name: t.contact, path: '/contact' },
     { name: t.admin, path: '/admin' },
   ];
