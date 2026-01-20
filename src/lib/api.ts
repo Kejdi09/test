@@ -141,6 +141,13 @@ class ApiClient {
     return this.request(`/messages/${id}`);
   }
 
+  async createMessage(data: { name: string; email: string; subject: string; message: string }) {
+    return this.request('/messages', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
   async markMessageAsRead(id: string, isRead: boolean) {
     return this.request(`/messages/${id}/read`, {
       method: 'PATCH',
