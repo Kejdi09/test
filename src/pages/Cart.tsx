@@ -6,7 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 
 // Demo placeholders—replace with real contact points when ready
-const INSTAGRAM_USERNAME = 'demo_handle';
+const INSTAGRAM_USERNAME = 'gjilpera_magjike';
 const WHATSAPP_NUMBER = '+355600000000';
 
 const Cart = () => {
@@ -243,13 +243,9 @@ const Cart = () => {
                 </a>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex justify-end">
                 <Button variant="ghost" onClick={() => setShowConfirm(false)}>
                   Cancel
-                </Button>
-                <Button onClick={() => window.open(whatsappUrl, '_blank')} className="btn-primary">
-                  Send Now
-                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
 
