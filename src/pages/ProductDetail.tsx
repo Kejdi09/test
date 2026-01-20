@@ -1,0 +1,260 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Minus, Plus, Heart, ChevronLeft, Check } from 'lucide-react';
+import Layout from '@/components/layout/Layout';
+import { useCart } from '@/context/CartContext';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { apiClient } from '@/lib/api';
+
+const ProductDetail = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { addToCart } = useCart();
+
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.getProduct(id!);
+        setProduct(response.data.product);
+      } catch (error) {
+        console.error('Failed to fetch product:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!product) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="font-display text-3xl mb-4">Product Not Found</h1>
+          <Link to="/shop" className="text-primary hover:underline">
+            Back to Shop
+          </Link>
+        </div>
+      </Layout>
+    );
+  }
+
+  const handleAddToCart = () => {
+    if (!selectedSize || !selectedColor) {
+      toast.error('Please select a size and color');
+      return;
+    }
+    for (let i = 0; i < quantity; i++) {
+      addToCart(product, selectedSize, selectedColor);
+    }
+    toast.success(`${product.name} added to cart!`);
+  };
+
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchRelated = async () => {
+      if (product) {
+        try {
+          const response = await apiClient.getProducts({ category: product.category, limit: '5' });
+          setRelatedProducts((response.data.products || []).filter((p: any) => p._id !== product._id).slice(0, 4));
+        } catch (error) {
+          console.error('Failed to fetch related products:', error);
+        }
+      }
+    };
+    fetchRelated();
+  }, [product]);
+
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 mb-8 font-body text-sm">
+          <Link to="/" className="text-muted-foreground hover:text-primary">Home</Link>
+          <span className="text-muted-foreground">/</span>
+          <Link to="/shop" className="text-muted-foreground hover:text-primary">Shop</Link>
+          <span className="text-muted-foreground">/</span>
+          <span className="text-foreground">{product.name}</span>
+        </nav>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Image */}
+          <div className="aspect-[3/4] overflow-hidden rounded-lg">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Details */}
+          <div className="lg:py-8">
+            <div className="mb-2">
+              <span className="text-accent font-body text-sm uppercase tracking-wider">
+                {product.category}
+              </span>
+            </div>
+            <h1 className="font-display text-3xl md:text-4xl text-foreground mb-4">
+              {product.name}
+            </h1>
+
+            <div className="flex items-center gap-3 mb-6">
+              <span className="font-display text-3xl text-foreground">${product.price}</span>
+              {product.originalPrice && (
+                <span className="font-body text-lg text-muted-foreground line-through">
+                  ${product.originalPrice}
+                </span>
+              )}
+              {product.originalPrice && (
+                <span className="bg-accent text-accent-foreground text-sm px-2 py-1 rounded">
+                  {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+                </span>
+              )}
+            </div>
+
+            <p className="font-body text-muted-foreground mb-8 leading-relaxed">
+              {product.description}
+            </p>
+
+            {/* Size selection */}
+            <div className="mb-6">
+              <h3 className="font-display text-lg mb-3">Size</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`min-w-12 px-4 py-2 border rounded font-body text-sm transition-all ${
+                      selectedSize === size
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border hover:border-primary'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Color selection */}
+            <div className="mb-8">
+              <h3 className="font-display text-lg mb-3">Color</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor(color)}
+                    className={`px-4 py-2 border rounded font-body text-sm transition-all flex items-center gap-2 ${
+                      selectedColor === color
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border hover:border-primary'
+                    }`}
+                  >
+                    {selectedColor === color && <Check className="w-4 h-4" />}
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity */}
+            <div className="mb-8">
+              <h3 className="font-display text-lg mb-3">Quantity</h3>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center border border-border rounded">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-3 hover:bg-muted transition-colors"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-12 text-center font-body">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-3 hover:bg-muted transition-colors"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-4 mb-8">
+              <Button
+                onClick={handleAddToCart}
+                size="lg"
+                className="flex-1 btn-primary font-body uppercase tracking-wider"
+              >
+                Add to Cart
+              </Button>
+              <Button size="lg" variant="outline" className="btn-outline" aria-label="Add to wishlist">
+                <Heart className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Features */}
+            <div className="border-t border-border pt-8 space-y-3 font-body text-sm text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary" /> Free shipping on orders over $150
+              </p>
+              <p className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary" /> 30-day easy returns
+              </p>
+              <p className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary" /> Secure checkout
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Related products */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-20">
+            <h2 className="font-display text-3xl text-foreground mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((p) => (
+                <Link key={p.id} to={`/product/${p.id}`} className="card-product group">
+                  <div className="aspect-[3/4] overflow-hidden">
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-display text-lg text-foreground">{p.name}</h3>
+                    <p className="font-body text-muted-foreground">${p.price}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default ProductDetail;
