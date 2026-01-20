@@ -11,6 +11,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { addToCart } = useCart();
 
   const [quantity, setQuantity] = useState(1);
@@ -31,17 +32,20 @@ const ProductDetail = () => {
         if (response.data && response.data.product) {
           console.log('Setting product:', response.data.product);
           setProduct(response.data.product);
+          setFetchError(null);
           // Scroll to top when product loads
           window.scrollTo(0, 0);
         } else {
           console.error('Unexpected response structure:', response);
           setProduct(null);
+          setFetchError('Unexpected response from server');
         }
       } catch (error) {
         console.error('Failed to fetch product:', error);
         if (error instanceof Error) {
           console.error('Error message:', error.message);
           console.error('Error stack:', error.stack);
+          setFetchError(error.message);
         }
         setProduct(null);
       } finally {
@@ -129,11 +133,16 @@ const ProductDetail = () => {
         
         {!isLoading && !product && (
           <div className="text-center py-20 min-h-screen flex items-center justify-center">
-            <h1 className="font-display text-3xl mb-4">Product Not Found</h1>
-            <p className="text-muted-foreground mb-6">This product doesn't exist or has been removed.</p>
-            <Link to="/shop" className="text-primary hover:underline font-semibold">
-              ← Back to Shop
-            </Link>
+            <div>
+              <h1 className="font-display text-3xl mb-4">Product Not Found</h1>
+              <p className="text-muted-foreground mb-2">This product doesn't exist or has been removed.</p>
+              {fetchError && (
+                <p className="text-sm text-destructive mb-4">{fetchError}</p>
+              )}
+              <Link to="/shop" className="text-primary hover:underline font-semibold">
+                ← Back to Shop
+              </Link>
+            </div>
           </div>
         )}
 

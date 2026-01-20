@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Determine sensible defaults when VITE_API_URL is missing (e.g., on Vercel)
+const defaultApiUrl =
+  typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+    ? 'https://test-ikgy.onrender.com/api'
+    : 'http://localhost:3001/api';
+
+const API_URL = import.meta.env.VITE_API_URL || defaultApiUrl;
 const BASE_URL = API_URL.replace('/api', ''); // Remove /api to get base URL
 
 console.log('API URL:', API_URL);
