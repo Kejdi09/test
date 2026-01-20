@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://embroidery-ecommerce.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 console.log('API URL:', API_URL);
 
