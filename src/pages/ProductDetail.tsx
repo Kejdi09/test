@@ -144,7 +144,7 @@ const ProductDetail = () => {
             <div className="mb-6">
               <h3 className="font-display text-lg mb-3">Size</h3>
               <div className="flex flex-wrap gap-2">
-                {(product.sizes && product.sizes.length > 0) ? product.sizes.map((size) => (
+                {(product.sizes && product.sizes.length > 0) ? product.sizes.map((size: string) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -164,7 +164,7 @@ const ProductDetail = () => {
             <div className="mb-8">
               <h3 className="font-display text-lg mb-3">Color</h3>
               <div className="flex flex-wrap gap-2">
-                {(product.colors && product.colors.length > 0) ? product.colors.map((color) => (
+                {(product.colors && product.colors.length > 0) ? product.colors.map((color: string) => (
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
