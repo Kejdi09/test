@@ -11,6 +11,8 @@ import productRoutes from './backend/routes/products.js';
 import messageRoutes from './backend/routes/messages.js';
 import websiteImageRoutes from './backend/routes/websiteImages.js';
 import analyticsRoutes from './backend/routes/analytics.js';
+import emailVerificationRoutes from './backend/routes/emailVerification.js';
+import orderRequestRoutes from './backend/routes/orderRequests.js';
 
 dotenv.config();
 
@@ -82,6 +84,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/website-images', websiteImageRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/email', emailVerificationRoutes);
+app.use('/api/orders', orderRequestRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -205,6 +205,40 @@ class ApiClient {
     return this.request(`/website-images/${section}`, { method: 'DELETE' });
   }
 
+  // Email verification + order request
+  async sendEmailCode(email: string) {
+    return this.request('/email/send-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async verifyEmailCode(email: string, code: string) {
+    return this.request('/email/verify-code', {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+  }
+
+  async createOrderRequest(data: {
+    token: string;
+    email: string;
+    items: any[];
+    totals: { subtotal: number; shipping: number; total: number };
+    note?: string;
+  }) {
+    return this.request('/orders/request', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getOrderRequests(limit = 100) {
+    return this.request(`/orders?limit=${limit}`, {
+      method: 'GET',
+    });
+  }
+
   // Analytics endpoints
   async getDashboardStats() {
     return this.request('/analytics/dashboard');

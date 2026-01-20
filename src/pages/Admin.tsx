@@ -1,301 +1,107 @@
-import { useState } from 'react';
-import { useTranslation } from '@/context/LanguageContext';
+import { useEffect, useMemo, useState } from 'react';
 import Layout from '@/components/layout/Layout';
+import { apiClient } from '@/lib/api';
+
+type OrderItem = {
+  name: string;
+  quantity: number;
+  selectedSize?: string;
+  selectedColor?: string;
+  price?: number;
+};
+
+type OrderRequest = {
+  _id: string;
+  email: string;
+  createdAt: string;
+  items: OrderItem[];
+  totals?: { total?: number; subtotal?: number; shipping?: number };
+};
 
 const Admin = () => {
-  const { t } = useTranslation();
-  const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    category: 'dresses',
-    description: '',
-    colors: '',
-    sizes: '',
-    featured: false,
-  });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
+  const [orders, setOrders] = useState<OrderRequest[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState('');
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement;
-      setFormData((prev) => ({
-        ...prev,
-        [name]: target.checked,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-
+  const fetchOrders = async () => {
+    setOrdersError('');
+    setOrdersLoading(true);
     try {
-      if (!imageFile) {
-        throw new Error('Please select an image');
-      }
-
-      const colorsArray = formData.colors
-        .split(',')
-        .map((c) => c.trim())
-        .filter((c) => c);
-      const sizesArray = formData.sizes
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s);
-
-      const productData = {
-        name: formData.name,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        description: formData.description,
-        colors: colorsArray,
-        sizes: sizesArray,
-        featured: formData.featured,
-        inStock: true,
-      };
-
-      const formDataToSend = new FormData();
-      formDataToSend.append('data', JSON.stringify(productData));
-      formDataToSend.append('images', imageFile);
-
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/products`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formDataToSend,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to add product');
-      }
-
-      const result = await response.json();
-      setMessageType('success');
-      setMessage('Product added successfully!');
-      
-      // Reset form
-      setFormData({
-        name: '',
-        price: '',
-        category: 'dresses',
-        description: '',
-        colors: '',
-        sizes: '',
-        featured: false,
-      });
-      setImageFile(null);
-      setImagePreview('');
-    } catch (error) {
-      setMessageType('error');
-      setMessage(error instanceof Error ? error.message : 'Failed to add product');
+      const res = await apiClient.getOrderRequests(100);
+      setOrders(res.data?.orders || []);
+    } catch (error: any) {
+      setOrdersError(error.message || 'Failed to load order requests');
     } finally {
-      setLoading(false);
+      setOrdersLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const formattedOrders = useMemo(() => {
+    return orders.map((order) => {
+      const total = order.totals?.total ?? order.totals?.subtotal ?? 0;
+      const created = new Date(order.createdAt).toLocaleString();
+      return { ...order, total, created };
+    });
+  }, [orders]);
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-display font-bold mb-4 text-center">
-            {t.addProductTitle}
-          </h1>
-          <p className="text-center text-muted-foreground mb-12">
-            Add new products to your store
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-6 bg-muted/50 p-8 rounded-lg border border-border">
-            {message && (
-              <div
-                className={`p-4 rounded-lg text-sm ${
-                  messageType === 'success'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {message}
-              </div>
-            )}
-
-            {/* Product Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-2">
-                {t.productName} *
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                placeholder="e.g., Green Embroidered Dress"
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Price */}
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium mb-2">
-                {t.productPrice} (€) *
-              </label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                required
-                step="0.01"
-                placeholder="99.99"
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Category */}
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium mb-2">
-                {t.productCategory} *
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-background"
-              >
-                <option value="dresses">{t.dresses}</option>
-                <option value="tops">{t.tops}</option>
-                <option value="skirts">{t.skirts}</option>
-                <option value="jackets">{t.jackets}</option>
-              </select>
-            </div>
-
-            {/* Image Upload */}
-            <div>
-              <label htmlFor="imageFile" className="block text-sm font-medium mb-2">
-                {t.productImage} *
-              </label>
-              <input
-                type="file"
-                id="imageFile"
-                accept="image/*"
-                onChange={handleFileChange}
-                required
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              {imagePreview && (
-                <div className="mt-3 relative">
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
-                    className="w-32 h-40 object-cover rounded-lg border border-border"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">Image preview</p>
-                </div>
-              )}
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium mb-2">
-                {t.productDescription}
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Describe your product..."
-                rows={4}
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-              />
-            </div>
-
-            {/* Colors */}
-            <div>
-              <label htmlFor="colors" className="block text-sm font-medium mb-2">
-                {t.color} (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="colors"
-                name="colors"
-                value={formData.colors}
-                onChange={handleInputChange}
-                placeholder="e.g., Green, Sage, Forest"
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Sizes */}
-            <div>
-              <label htmlFor="sizes" className="block text-sm font-medium mb-2">
-                {t.size} (comma-separated)
-              </label>
-              <input
-                type="text"
-                id="sizes"
-                name="sizes"
-                value={formData.sizes}
-                onChange={handleInputChange}
-                placeholder="e.g., XS, S, M, L, XL"
-                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            {/* Featured Checkbox */}
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="featured"
-                name="featured"
-                checked={formData.featured}
-                onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
-                className="w-5 h-5 text-primary border-border rounded focus:ring-2 focus:ring-primary"
-              />
-              <label htmlFor="featured" className="text-sm font-medium cursor-pointer">
-                Feature this product on homepage
-              </label>
-            </div>
-
-            {/* Submit Button */}
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground">Order Requests</h1>
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              type="button"
+              onClick={fetchOrders}
+              className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
+              disabled={ordersLoading}
             >
-              {loading ? 'Adding...' : t.addButton}
+              {ordersLoading ? 'Refreshing…' : 'Refresh'}
             </button>
-          </form>
+          </div>
+
+          {ordersError && <p className="text-sm text-destructive mb-4">{ordersError}</p>}
+          {!ordersError && formattedOrders.length === 0 && !ordersLoading && (
+            <p className="text-sm text-muted-foreground">No order requests yet.</p>
+          )}
+
+          <div className="overflow-x-auto bg-muted/40 border border-border rounded-lg">
+            <table className="min-w-full text-sm font-body">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border">
+                  <th className="py-2 px-4">Email</th>
+                  <th className="py-2 px-4">Items</th>
+                  <th className="py-2 px-4">Total</th>
+                  <th className="py-2 px-4">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {formattedOrders.map((order) => (
+                  <tr key={order._id} className="border-b border-border last:border-0">
+                    <td className="py-2 px-4 text-foreground align-top">{order.email}</td>
+                    <td className="py-2 px-4 text-foreground align-top">
+                      {order.items.map((item) => (
+                        <div
+                          key={`${order._id}-${item.name}-${item.selectedSize}-${item.selectedColor}`}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {item.name} · x{item.quantity}
+                          {item.selectedSize ? ` · ${item.selectedSize}` : ''}
+                          {item.selectedColor ? ` · ${item.selectedColor}` : ''}
+                        </div>
+                      ))}
+                    </td>
+                    <td className="py-2 px-4 text-foreground align-top">${order.total.toFixed(2)}</td>
+                    <td className="py-2 px-4 text-muted-foreground align-top whitespace-nowrap">{order.created}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </Layout>

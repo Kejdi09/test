@@ -1,23 +1,16 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, X, ShoppingBag, Send, MessageCircle, Mail } from 'lucide-react';
+import { Minus, Plus, X, ShoppingBag, Send, MessageCircle, Copy } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 
 // Demo placeholders—replace with real contact points when ready
-const WHATSAPP_NUMBER = '+355600000000';
+const WHATSAPP_NUMBER = '+355692568414';
 
 const Cart = () => {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [codeSent, setCodeSent] = useState(false);
-  const [codeVerified, setCodeVerified] = useState(false);
-  const [sendingCode, setSendingCode] = useState(false);
-  const [verifyingCode, setVerifyingCode] = useState(false);
-  const [infoMessage, setInfoMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [copied, setCopied] = useState(false);
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
 
   if (items.length === 0) {
@@ -64,36 +57,13 @@ const Cart = () => {
     [orderMessage, whatsappNumber]
   );
 
-  // Demo-only email verification: code is always 123456
-  const sendVerificationCode = async () => {
-    setErrorMessage('');
-    setInfoMessage('');
-    if (!email) {
-      setErrorMessage('Please enter your email to get a verification code.');
-      return;
-    }
-    setSendingCode(true);
-    await new Promise((res) => setTimeout(res, 800));
-    setSendingCode(false);
-    setCodeSent(true);
-    setInfoMessage('Demo code sent. Use 123456 to verify.');
-  };
-
-  const verifyCode = async () => {
-    setErrorMessage('');
-    setInfoMessage('');
-    if (!code) {
-      setErrorMessage('Enter the code you received.');
-      return;
-    }
-    setVerifyingCode(true);
-    await new Promise((res) => setTimeout(res, 600));
-    setVerifyingCode(false);
-    if (code === '123456') {
-      setCodeVerified(true);
-      setInfoMessage('Email verified (demo). Order saved for admin follow-up.');
-    } else {
-      setErrorMessage('Invalid code (demo uses 123456).');
+  const copyOrderText = async () => {
+    try {
+      await navigator.clipboard.writeText(orderMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      setCopied(false);
     }
   };
 
@@ -105,63 +75,67 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart items */}
           <div className="lg:col-span-2 space-y-6">
-            {items.map((item) => (
-              <div
-                key={`${item.id}-${item.selectedSize}-${item.selectedColor}`}
-                className="flex gap-6 pb-6 border-b border-border animate-fade-in"
-              >
-                <Link to={`/product/${item.id}`} className="w-24 md:w-32 aspect-[3/4] flex-shrink-0">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover rounded"
-                  />
-                </Link>
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <div>
-                      <Link to={`/product/${item.id}`}>
-                        <h3 className="font-display text-lg text-foreground hover:text-primary transition-colors">
-                          {item.name}
-                        </h3>
-                      </Link>
-                      <p className="font-body text-sm text-muted-foreground mt-1">
-                        Size: {item.selectedSize} | Color: {item.selectedColor}
+            {items.map((item) => {
+              const itemId = item.id || item._id || '';
+              const itemKey = `${itemId}-${item.selectedSize}-${item.selectedColor}`;
+              return (
+                <div
+                  key={itemKey}
+                  className="flex gap-6 pb-6 border-b border-border animate-fade-in"
+                >
+                  <Link to={`/product/${itemId}`} className="w-24 md:w-32 aspect-[3/4] flex-shrink-0">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  </Link>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <div>
+                        <Link to={`/product/${itemId}`}>
+                          <h3 className="font-display text-lg text-foreground hover:text-primary transition-colors">
+                            {item.name}
+                          </h3>
+                        </Link>
+                        <p className="font-body text-sm text-muted-foreground mt-1">
+                          Size: {item.selectedSize} | Color: {item.selectedColor}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => itemId && removeFromCart(itemId)}
+                        className="p-1 hover:text-destructive transition-colors"
+                        aria-label="Remove item"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center border border-border rounded">
+                        <button
+                          onClick={() => itemId && updateQuantity(itemId, item.quantity - 1)}
+                          className="p-2 hover:bg-muted transition-colors"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="w-10 text-center font-body">{item.quantity}</span>
+                        <button
+                          onClick={() => itemId && updateQuantity(itemId, item.quantity + 1)}
+                          className="p-2 hover:bg-muted transition-colors"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="font-body font-semibold text-foreground">
+                        ${(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="p-1 hover:text-destructive transition-colors"
-                      aria-label="Remove item"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center border border-border rounded">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-2 hover:bg-muted transition-colors"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-10 text-center font-body">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-2 hover:bg-muted transition-colors"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p className="font-body font-semibold text-foreground">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <button
               onClick={clearCart}
@@ -202,7 +176,7 @@ const Cart = () => {
                 className="w-full mt-6 btn-primary font-body uppercase tracking-wider"
                 onClick={() => setShowConfirm(true)}
               >
-                Send this Order
+                Contact to Order
                 <Send className="w-4 h-4 ml-2" />
               </Button>
 
@@ -223,7 +197,7 @@ const Cart = () => {
                 <div>
                   <h3 className="font-display text-xl">Confirm & Send</h3>
                   <p className="font-body text-sm text-muted-foreground mt-1">
-                    You are requesting to order these items. Choose WhatsApp or the email flow below.
+                    To buy, contact us on WhatsApp or copy the summary and message us on your favorite social channel.
                   </p>
                 </div>
                 <button
@@ -236,16 +210,20 @@ const Cart = () => {
               </div>
 
               <div className="bg-muted/50 rounded-md p-3 space-y-2 max-h-64 overflow-y-auto">
-                {items.map((item) => (
-                  <div key={`${item.id}-${item.selectedSize}-${item.selectedColor}`} className="flex justify-between text-sm font-body">
-                    <div className="text-foreground">
-                      {item.name}
-                      <span className="text-muted-foreground"> · {item.selectedSize} / {item.selectedColor}</span>
-                      <span className="text-muted-foreground"> · x{item.quantity}</span>
+                {items.map((item) => {
+                  const itemId = item.id || item._id || '';
+                  const itemKey = `${itemId}-${item.selectedSize}-${item.selectedColor}`;
+                  return (
+                    <div key={itemKey} className="flex justify-between text-sm font-body">
+                      <div className="text-foreground">
+                        {item.name}
+                        <span className="text-muted-foreground"> · {item.selectedSize} / {item.selectedColor}</span>
+                        <span className="text-muted-foreground"> · x{item.quantity}</span>
+                      </div>
+                      <span className="text-foreground">${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
-                    <span className="text-foreground">${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
+                  );
+                })}
                 <div className="border-t border-border pt-2 text-sm font-body space-y-1">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
@@ -272,50 +250,16 @@ const Cart = () => {
                   <MessageCircle className="w-4 h-4" /> Send via WhatsApp
                 </a>
                 <div className="rounded-md border border-border p-3 space-y-2 bg-muted/40">
-                  <div className="flex items-center gap-2 text-sm font-body text-foreground">
-                    <Mail className="w-4 h-4" />
-                    <span>Send via Email (demo)</span>
+                  <p className="text-sm font-body text-foreground">Copy order text for Instagram/Facebook DM.</p>
+                  <div className="rounded bg-background border border-border p-2 text-xs font-body text-muted-foreground max-h-24 overflow-y-auto whitespace-pre-wrap">
+                    {orderMessage}
                   </div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="w-full rounded border border-border bg-background px-3 py-2 text-sm font-body"
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={sendingCode}
-                      onClick={sendVerificationCode}
-                    >
-                      {sendingCode ? 'Sending…' : codeSent ? 'Resend Code' : 'Send Code'}
-                    </Button>
-                    <input
-                      type="text"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder="123456"
-                      className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm font-body"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={!codeSent || verifyingCode}
-                      onClick={verifyCode}
-                    >
-                      {verifyingCode ? 'Verifying…' : 'Verify'}
-                    </Button>
-                  </div>
-                  {infoMessage && <p className="text-xs text-foreground">{infoMessage}</p>}
-                  {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
-                  {codeVerified && (
-                    <p className="text-xs text-emerald-600">
-                      Verified (demo). Order + email saved for admin follow-up.
-                    </p>
-                  )}
+                  <Button type="button" size="sm" variant="outline" className="w-full" onClick={copyOrderText}>
+                    <Copy className="w-4 h-4 mr-2" /> {copied ? 'Copied' : 'Copy order text'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground font-body">
+                    Paste this into any social DM if you prefer not to use WhatsApp.
+                  </p>
                 </div>
               </div>
 
@@ -327,7 +271,7 @@ const Cart = () => {
 
               <div className="space-y-1 text-xs text-muted-foreground font-body">
                 <p>WhatsApp opens with the order prefilled. Update the WhatsApp number when ready.</p>
-                <p>Email flow is demo-only: code is 123456 and data is not actually emailed.</p>
+                <p>You can also copy the order text and send it in any social DM.</p>
               </div>
             </div>
           </div>
