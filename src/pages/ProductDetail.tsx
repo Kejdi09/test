@@ -118,11 +118,17 @@ const ProductDetail = () => {
               <span className="text-muted-foreground">/</span>
               <span className="text-foreground">Loading...</span>
             </nav>
+                      <div className="mt-12 text-center py-20 min-h-screen flex items-center justify-center">
+                        <div>
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+                          <p className="mt-4 text-muted-foreground">Loading product...</p>
+                        </div>
+                      </div>
           </>
         )}
         
         {!isLoading && !product && (
-          <div className="text-center py-20">
+          <div className="text-center py-20 min-h-screen flex items-center justify-center">
             <h1 className="font-display text-3xl mb-4">Product Not Found</h1>
             <p className="text-muted-foreground mb-6">This product doesn't exist or has been removed.</p>
             <Link to="/shop" className="text-primary hover:underline font-semibold">
@@ -148,7 +154,7 @@ const ProductDetail = () => {
             <img
               src={apiClient.getImageUrl(product.images?.[0]?.url || product.image)}
               alt={product.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
 
@@ -286,7 +292,7 @@ const ProductDetail = () => {
                     <img
                       src={apiClient.getImageUrl(p.images?.[0]?.url || p.image)}
                       alt={p.name}
-                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4">
