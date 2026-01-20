@@ -12,7 +12,10 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { t } = useTranslation();
 
-  const productImage = apiClient.getImageUrl(product.images?.[0]?.url || product.image);
+  const firstImage = product.images?.[0];
+  const productImage = apiClient.getImageUrl(
+    (typeof firstImage === 'string' ? firstImage : firstImage?.url) || product.image || ''
+  );
   const productId = product._id || product.id;
 
   return (
