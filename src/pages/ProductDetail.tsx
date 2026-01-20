@@ -106,16 +106,41 @@ const ProductDetail = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 mb-8 font-body text-sm">
-          <Link to="/" className="text-muted-foreground hover:text-primary">Home</Link>
-          <span className="text-muted-foreground">/</span>
-          <Link to="/shop" className="text-muted-foreground hover:text-primary">Shop</Link>
-          <span className="text-muted-foreground">/</span>
-          <span className="text-foreground">{product.name}</span>
-        </nav>
+        {isLoading && (
+          <>
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 mb-8 font-body text-sm">
+              <Link to="/" className="text-muted-foreground hover:text-primary">Home</Link>
+              <span className="text-muted-foreground">/</span>
+              <Link to="/shop" className="text-muted-foreground hover:text-primary">Shop</Link>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-foreground">Loading...</span>
+            </nav>
+          </>
+        )}
+        
+        {!isLoading && !product && (
+          <div className="text-center py-20">
+            <h1 className="font-display text-3xl mb-4">Product Not Found</h1>
+            <p className="text-muted-foreground mb-6">This product doesn't exist or has been removed.</p>
+            <Link to="/shop" className="text-primary hover:underline font-semibold">
+              ← Back to Shop
+            </Link>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {product && (
+          <>
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 mb-8 font-body text-sm">
+              <Link to="/" className="text-muted-foreground hover:text-primary">Home</Link>
+              <span className="text-muted-foreground">/</span>
+              <Link to="/shop" className="text-muted-foreground hover:text-primary">Shop</Link>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-foreground">{product.name}</span>
+            </nav>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Image */}
           <div className="aspect-[3/4] overflow-hidden rounded-lg">
             <img
@@ -270,6 +295,8 @@ const ProductDetail = () => {
               ))}
             </div>
           </section>
+        )}
+          </>
         )}
       </div>
     </Layout>
