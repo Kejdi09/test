@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Menu, X, Search, User, Heart } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useTranslation } from '@/context/LanguageContext';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -58,14 +58,8 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-4">
-            <button className="p-2 hover:text-primary transition-colors" aria-label={t.search}>
+            <Link to="/shop" className="p-2 hover:text-primary transition-colors" aria-label={t.search}>
               <Search className="w-5 h-5" />
-            </button>
-            <button className="hidden md:block p-2 hover:text-primary transition-colors" aria-label={t.wishlist}>
-              <Heart className="w-5 h-5" />
-            </button>
-            <Link to="/account" className="hidden md:block p-2 hover:text-primary transition-colors" aria-label={t.account}>
-              <User className="w-5 h-5" />
             </Link>
             <Link to="/cart" className="p-2 hover:text-primary transition-colors relative" aria-label={t.cart}>
               <ShoppingBag className="w-5 h-5" />
