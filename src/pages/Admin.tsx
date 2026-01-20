@@ -12,6 +12,7 @@ const Admin = () => {
     description: '',
     colors: '',
     sizes: '',
+    featured: false,
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -50,6 +51,7 @@ const Admin = () => {
         description: formData.description,
         colors: colorsArray,
         sizes: sizesArray,
+        featured: formData.featured,
       };
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
@@ -77,6 +79,7 @@ const Admin = () => {
         description: '',
         colors: '',
         sizes: '',
+        featured: false,
       });
     } catch (error) {
       setMessageType('error');
@@ -227,6 +230,21 @@ const Admin = () => {
                 placeholder="e.g., XS, S, M, L, XL"
                 className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+            </div>
+
+            {/* Featured Checkbox */}
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="featured"
+                name="featured"
+                checked={formData.featured}
+                onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+                className="w-5 h-5 text-primary border-border rounded focus:ring-2 focus:ring-primary"
+              />
+              <label htmlFor="featured" className="text-sm font-medium cursor-pointer">
+                Feature this product on homepage
+              </label>
             </div>
 
             {/* Submit Button */}
