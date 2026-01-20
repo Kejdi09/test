@@ -47,23 +47,33 @@ const Admin = () => {
         name: formData.name,
         price: parseFloat(formData.price),
         category: formData.category,
-        image: formData.image,
         description: formData.description,
         colors: colorsArray,
         sizes: sizesArray,
         featured: formData.featured,
+        inStock: true,
+        images: [{
+          url: formData.image,
+          alt: formData.name,
+          isPrimary: true
+        }]
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
+      const formDataToSend = new FormData();
+      formDataToSend.append('data', JSON.stringify(productData));
+
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/products`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(productData),
+        body: formDataToSend,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add product');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add product');
       }
 
       const result = await response.json();
