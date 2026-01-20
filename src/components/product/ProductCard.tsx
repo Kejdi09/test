@@ -11,11 +11,14 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { t } = useTranslation();
 
+  const productImage = product.images?.[0]?.url || product.image || 'https://via.placeholder.com/400x600?text=No+Image';
+  const productId = product._id || product.id;
+
   return (
     <div className="group card-product">
       <div className="relative aspect-[3/4] overflow-hidden">
         <img
-          src={product.image}
+          src={productImage}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
@@ -40,7 +43,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Quick view overlay */}
         <Link
-          to={`/product/${product.id}`}
+          to={`/product/${productId}`}
           className="absolute inset-0 bg-foreground/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"
         >
           <span className="bg-background text-foreground px-6 py-3 font-body text-sm uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-colors">
@@ -53,7 +56,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1 font-body">
           {product.category}
         </p>
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${productId}`}>
           <h3 className="font-display text-lg text-foreground hover:text-primary transition-colors mb-2">
             {product.name}
           </h3>

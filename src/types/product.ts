@@ -1,9 +1,11 @@
 export interface Product {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   price: number;
   originalPrice?: number;
-  image: string;
+  image?: string;
+  images?: Array<{ url: string; alt: string; isPrimary: boolean }>;
   category: string;
   description: string;
   sizes: string[];
@@ -11,6 +13,9 @@ export interface Product {
   inStock: boolean;
   isNew?: boolean;
   isFeatured?: boolean;
+  featured?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem extends Product {

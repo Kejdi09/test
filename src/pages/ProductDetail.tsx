@@ -100,7 +100,7 @@ const ProductDetail = () => {
           {/* Image */}
           <div className="aspect-[3/4] overflow-hidden rounded-lg">
             <img
-              src={product.image}
+              src={product.images?.[0]?.url || product.image || 'https://via.placeholder.com/400x600?text=No+Image'}
               alt={product.name}
               className="w-full h-full object-cover"
             />
