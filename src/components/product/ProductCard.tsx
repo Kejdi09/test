@@ -17,11 +17,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <div className="group card-product">
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted flex items-center justify-center">
         <img
           src={productImage}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
         />
         
         {/* Badges */}

@@ -31,6 +31,8 @@ const ProductDetail = () => {
         if (response.data && response.data.product) {
           console.log('Setting product:', response.data.product);
           setProduct(response.data.product);
+          // Scroll to top when product loads
+          window.scrollTo(0, 0);
         } else {
           console.error('Unexpected response structure:', response);
           setProduct(null);
@@ -142,11 +144,11 @@ const ProductDetail = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Image */}
-          <div className="aspect-[3/4] overflow-hidden rounded-lg">
+          <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
             <img
               src={apiClient.getImageUrl(product.images?.[0]?.url || product.image)}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
 
@@ -280,11 +282,11 @@ const ProductDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((p) => (
                 <Link key={p._id || p.id} to={`/product/${p._id || p.id}`} className="card-product group">
-                  <div className="aspect-[3/4] overflow-hidden">
+                  <div className="aspect-[3/4] overflow-hidden bg-muted flex items-center justify-center">
                     <img
                       src={apiClient.getImageUrl(p.images?.[0]?.url || p.image)}
                       alt={p.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4">
