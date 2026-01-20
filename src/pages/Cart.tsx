@@ -1,17 +1,23 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, X, ShoppingBag, Send, Instagram, MessageCircle } from 'lucide-react';
+import { Minus, Plus, X, ShoppingBag, Send, MessageCircle, Mail } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 
 // Demo placeholders—replace with real contact points when ready
-const INSTAGRAM_USERNAME = 'gjilpera_magjike';
 const WHATSAPP_NUMBER = '+355600000000';
 
 const Cart = () => {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [codeVerified, setCodeVerified] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [infoMessage, setInfoMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
 
   if (items.length === 0) {
@@ -53,23 +59,41 @@ const Cart = () => {
   }, [items, shipping, total, totalPrice]);
 
   const whatsappNumber = useMemo(() => WHATSAPP_NUMBER.replace(/\D/g, ''), []);
-  const instagramUrl = useMemo(() => `https://www.instagram.com/${INSTAGRAM_USERNAME}`, []);
   const whatsappUrl = useMemo(
     () => `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`,
     [orderMessage, whatsappNumber]
   );
 
-  const handleInstagramSend = async () => {
-    try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(orderMessage);
-        setCopiedToClipboard(true);
-      }
-    } catch (error) {
-      // Silent fallback; still open the link even if copy fails
-      setCopiedToClipboard(false);
-    } finally {
-      window.open(instagramUrl, '_blank');
+  // Demo-only email verification: code is always 123456
+  const sendVerificationCode = async () => {
+    setErrorMessage('');
+    setInfoMessage('');
+    if (!email) {
+      setErrorMessage('Please enter your email to get a verification code.');
+      return;
+    }
+    setSendingCode(true);
+    await new Promise((res) => setTimeout(res, 800));
+    setSendingCode(false);
+    setCodeSent(true);
+    setInfoMessage('Demo code sent. Use 123456 to verify.');
+  };
+
+  const verifyCode = async () => {
+    setErrorMessage('');
+    setInfoMessage('');
+    if (!code) {
+      setErrorMessage('Enter the code you received.');
+      return;
+    }
+    setVerifyingCode(true);
+    await new Promise((res) => setTimeout(res, 600));
+    setVerifyingCode(false);
+    if (code === '123456') {
+      setCodeVerified(true);
+      setInfoMessage('Email verified (demo). Order saved for admin follow-up.');
+    } else {
+      setErrorMessage('Invalid code (demo uses 123456).');
     }
   };
 
@@ -199,8 +223,7 @@ const Cart = () => {
                 <div>
                   <h3 className="font-display text-xl">Confirm & Send</h3>
                   <p className="font-body text-sm text-muted-foreground mt-1">
-                    You are requesting to order these items. If possible, our staff will contact you.
-                    Choose Instagram or WhatsApp to send the order details.
+                    You are requesting to order these items. Choose WhatsApp or the email flow below.
                   </p>
                 </div>
                 <button
@@ -240,12 +263,6 @@ const Cart = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  onClick={handleInstagramSend}
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-4 py-2 font-body hover:bg-muted transition-colors"
-                >
-                  <Instagram className="w-4 h-4" /> Send via Instagram
-                </button>
                 <a
                   href={whatsappUrl}
                   target="_blank"
@@ -254,6 +271,52 @@ const Cart = () => {
                 >
                   <MessageCircle className="w-4 h-4" /> Send via WhatsApp
                 </a>
+                <div className="rounded-md border border-border p-3 space-y-2 bg-muted/40">
+                  <div className="flex items-center gap-2 text-sm font-body text-foreground">
+                    <Mail className="w-4 h-4" />
+                    <span>Send via Email (demo)</span>
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full rounded border border-border bg-background px-3 py-2 text-sm font-body"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={sendingCode}
+                      onClick={sendVerificationCode}
+                    >
+                      {sendingCode ? 'Sending…' : codeSent ? 'Resend Code' : 'Send Code'}
+                    </Button>
+                    <input
+                      type="text"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder="123456"
+                      className="flex-1 rounded border border-border bg-background px-3 py-2 text-sm font-body"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={!codeSent || verifyingCode}
+                      onClick={verifyCode}
+                    >
+                      {verifyingCode ? 'Verifying…' : 'Verify'}
+                    </Button>
+                  </div>
+                  {infoMessage && <p className="text-xs text-foreground">{infoMessage}</p>}
+                  {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
+                  {codeVerified && (
+                    <p className="text-xs text-emerald-600">
+                      Verified (demo). Order + email saved for admin follow-up.
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -263,11 +326,8 @@ const Cart = () => {
               </div>
 
               <div className="space-y-1 text-xs text-muted-foreground font-body">
-                <p>
-                  Instagram will open a new tab; the order is copied so you can paste it in DM.
-                </p>
                 <p>WhatsApp opens with the order prefilled. Update the WhatsApp number when ready.</p>
-                {copiedToClipboard && <p className="text-foreground">Order copied. Paste in Instagram DM.</p>}
+                <p>Email flow is demo-only: code is 123456 and data is not actually emailed.</p>
               </div>
             </div>
           </div>
