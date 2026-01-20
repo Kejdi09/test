@@ -6,6 +6,7 @@ import { FileUpload } from '../../components/admin/FileUpload';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { apiClient } from '../../lib/api';
 import { toast } from 'sonner';
+import { categories as adminCategories } from '@/data/products';
 
 interface Product {
   _id: string;
@@ -23,6 +24,15 @@ interface Product {
 }
 
 export const AdminProducts: React.FC = () => {
+  const mainCategories = adminCategories.filter((category) => !category.parent);
+  const subcategoriesByParent = adminCategories.reduce<Record<string, typeof adminCategories>>((acc, category) => {
+    if (!category.parent) return acc;
+    acc[category.parent] = acc[category.parent] || [];
+    acc[category.parent].push(category);
+    return acc;
+  }, {});
+  const defaultCategory = mainCategories[0]?.id || adminCategories[0]?.id || '';
+
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,7 +47,7 @@ export const AdminProducts: React.FC = () => {
     name: '',
     description: '',
     price: '',
-    category: 'dresses',
+    category: defaultCategory,
     colors: '',
     sizes: '',
     stock: '',
@@ -87,7 +97,7 @@ export const AdminProducts: React.FC = () => {
         name: '',
         description: '',
         price: '',
-        category: 'dresses',
+        category: defaultCategory,
         colors: '',
         sizes: '',
         stock: '',
@@ -298,12 +308,14 @@ export const AdminProducts: React.FC = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Categories</option>
-              <option value="dresses">Dresses</option>
-              <option value="tops">Tops</option>
-              <option value="skirts">Skirts</option>
-              <option value="jackets">Jackets</option>
-              <option value="accessories">Accessories</option>
-              <option value="shoes">Shoes</option>
+              {mainCategories.map((main) => (
+                <React.Fragment key={main.id}>
+                  <option value={main.id}>{main.name}</option>
+                  {(subcategoriesByParent[main.id] || []).map((child) => (
+                    <option key={child.id} value={child.id}>— {child.name}</option>
+                  ))}
+                </React.Fragment>
+              ))}
             </select>
           </div>
         </div>
@@ -368,12 +380,14 @@ export const AdminProducts: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 required
               >
-                <option value="dresses">Dresses</option>
-                <option value="tops">Tops</option>
-                <option value="skirts">Skirts</option>
-                <option value="jackets">Jackets</option>
-                <option value="accessories">Accessories</option>
-                <option value="shoes">Shoes</option>
+                {mainCategories.map((main) => (
+                  <React.Fragment key={main.id}>
+                    <option value={main.id}>{main.name}</option>
+                    {(subcategoriesByParent[main.id] || []).map((child) => (
+                      <option key={child.id} value={child.id}>— {child.name}</option>
+                    ))}
+                  </React.Fragment>
+                ))}
               </select>
             </div>
 
