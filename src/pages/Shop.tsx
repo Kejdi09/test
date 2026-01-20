@@ -4,7 +4,6 @@ import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/product/ProductCard';
 import { useTranslatedCategories } from '@/data/products';
 import { Category } from '@/types/product';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
@@ -106,6 +105,15 @@ const Shop = () => {
             {selectedCategory ? categories.find((c) => c.id === selectedCategory)?.name : t.shopAll}
           </h1>
           <p className="font-body text-muted-foreground max-w-xl mx-auto">{t.shopDescription}</p>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-24 space-y-8">
+              <div>
+                <h3 className="font-display text-lg mb-4">{t.categories}</h3>
                 <div className="space-y-3">
                   <button onClick={() => handleCategoryChange('all')} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{t.allProducts}</button>
                   {mainCategories.map((main) => {
@@ -130,15 +138,6 @@ const Shop = () => {
                       </div>
                     );
                   })}
-                </div>
-            <div className="sticky top-24 space-y-8">
-              <div>
-                <h3 className="font-display text-lg mb-4">{t.categories}</h3>
-                <div className="space-y-2">
-                  <button onClick={() => handleCategoryChange('all')} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{t.allProducts}</button>
-                  {categories.map((category) => (
-                    <button key={category.id} onClick={() => handleCategoryChange(category.id)} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${selectedCategory === category.id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{category.name}</button>
-                  ))}
                 </div>
               </div>
               <div>
