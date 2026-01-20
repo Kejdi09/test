@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/product/ProductCard';
 import { useTranslatedCategories } from '@/data/products';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Filter, X } from 'lucide-react';
@@ -19,6 +20,7 @@ const Shop = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 300]);
   const [sortBy, setSortBy] = useState('featured');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const selectedCategory = searchParams.get('category') || '';
 
@@ -41,6 +43,14 @@ const Shop = () => {
     let filtered = [...products];
     if (selectedCategory) {
       filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) =>
+        (p.name || '').toLowerCase().includes(term) ||
+        (p.description || '').toLowerCase().includes(term) ||
+        (p.category || '').toLowerCase().includes(term)
+      );
     }
     filtered = filtered.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
     switch (sortBy) {
@@ -107,19 +117,27 @@ const Shop = () => {
           </aside>
 
           <div className="flex-1">
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
-              <p className="font-body text-sm text-muted-foreground">{t.showingProducts.replace('{count}', String(filteredProducts.length))}</p>
-              <div className="flex items-center gap-4">
-                <button className="lg:hidden flex items-center gap-2 font-body text-sm" onClick={() => setShowFilters(true)}><Filter className="w-4 h-4" />{t.filters}</button>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="featured">{t.featured}</SelectItem>
-                    <SelectItem value="newest">{t.newest}</SelectItem>
-                    <SelectItem value="price-low">{t.priceLowHigh}</SelectItem>
-                    <SelectItem value="price-high">{t.priceHighLow}</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="flex flex-col gap-4 mb-8 pb-4 border-b border-border">
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                <p className="font-body text-sm text-muted-foreground">{t.showingProducts.replace('{count}', String(filteredProducts.length))}</p>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <Input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder={t.search || 'Search products'}
+                    className="w-full sm:w-64"
+                  />
+                  <button className="lg:hidden flex items-center gap-2 font-body text-sm" onClick={() => setShowFilters(true)}><Filter className="w-4 h-4" />{t.filters}</button>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="featured">{t.featured}</SelectItem>
+                      <SelectItem value="newest">{t.newest}</SelectItem>
+                      <SelectItem value="price-low">{t.priceLowHigh}</SelectItem>
+                      <SelectItem value="price-high">{t.priceHighLow}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 

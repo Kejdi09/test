@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Minus, Plus, Heart, Check } from 'lucide-react';
+import { Minus, Plus, Check, Instagram, Facebook, Mail } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
@@ -216,13 +216,24 @@ const ProductDetail = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button onClick={handleAddToCart} size="lg" className="flex-1">
                 Add to Cart
               </Button>
-              <Button size="lg" variant="outline">
-                <Heart />
-              </Button>
+              <Link to="/contact" className="flex-1">
+                <Button size="lg" variant="outline" className="w-full">
+                  Contact us to buy
+                </Button>
+              </Link>
+            </div>
+
+            <div className="mt-6 space-y-2">
+              <p className="text-sm text-muted-foreground">Prefer socials? Reach out directly:</p>
+              <div className="flex items-center gap-3">
+                <a href="https://www.instagram.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm hover:text-primary"><Instagram className="w-4 h-4" /> Instagram</a>
+                <a href="https://www.facebook.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm hover:text-primary"><Facebook className="w-4 h-4" /> Facebook</a>
+                <a href="mailto:info@gjilperamagjike.com" className="inline-flex items-center gap-2 text-sm hover:text-primary"><Mail className="w-4 h-4" /> Email</a>
+              </div>
             </div>
           </div>
         </div>
