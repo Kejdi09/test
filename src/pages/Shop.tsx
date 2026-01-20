@@ -125,7 +125,7 @@ const Shop = () => {
 
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product, index) => (<div key={product.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}><ProductCard product={product} /></div>))}
+                {filteredProducts.map((product, index) => (<div key={product._id || product.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}><ProductCard product={product} /></div>))}
               </div>
             ) : (
               <div className="text-center py-16"><p className="font-display text-2xl text-foreground mb-2">{t.noProductsFound}</p><p className="font-body text-muted-foreground">{t.tryAdjustingFilters}</p></div>

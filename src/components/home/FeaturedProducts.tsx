@@ -58,7 +58,7 @@ const FeaturedProducts = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredProducts.map((product, index) => (
             <div
-              key={product.id}
+              key={product._id || product.id}
               className="animate-slide-up"
               style={{ animationDelay: `${index * 100}ms` }}
             >

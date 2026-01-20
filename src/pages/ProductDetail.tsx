@@ -21,10 +21,13 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setIsLoading(true);
+        console.log('Fetching product with ID:', id);
         const response = await apiClient.getProduct(id!);
+        console.log('Product response:', response);
         setProduct(response.data.product);
       } catch (error) {
         console.error('Failed to fetch product:', error);
+        setProduct(null);
       } finally {
         setIsLoading(false);
       }
