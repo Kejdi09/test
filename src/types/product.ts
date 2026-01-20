@@ -23,7 +23,7 @@ export interface CartItem extends Product {
   selectedSize: string;
   selectedColor: string;
 }
-
+//s
 export interface Category {
   id: string;
   name: string;
