@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, X, ShoppingBag, ArrowRight, Send, Instagram, MessageCircle } from 'lucide-react';
+import { Minus, Plus, X, ShoppingBag, Send, Instagram, MessageCircle } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ const WHATSAPP_NUMBER = '+355600000000';
 
 const Cart = () => {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
   const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
 
   if (items.length === 0) {
@@ -57,6 +58,20 @@ const Cart = () => {
     () => `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderMessage)}`,
     [orderMessage, whatsappNumber]
   );
+
+  const handleInstagramSend = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(orderMessage);
+        setCopiedToClipboard(true);
+      }
+    } catch (error) {
+      // Silent fallback; still open the link even if copy fails
+      setCopiedToClipboard(false);
+    } finally {
+      window.open(instagramUrl, '_blank');
+    }
+  };
 
   return (
     <Layout>
@@ -225,14 +240,12 @@ const Cart = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <a
-                  href={instagramUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  onClick={handleInstagramSend}
                   className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-4 py-2 font-body hover:bg-muted transition-colors"
                 >
                   <Instagram className="w-4 h-4" /> Send via Instagram
-                </a>
+                </button>
                 <a
                   href={whatsappUrl}
                   target="_blank"
@@ -249,9 +262,13 @@ const Cart = () => {
                 </Button>
               </div>
 
-              <p className="text-xs text-muted-foreground font-body">
-                Demo note: Instagram handle and WhatsApp number are placeholders. Replace them with real contact details to enable messaging.
-              </p>
+              <div className="space-y-1 text-xs text-muted-foreground font-body">
+                <p>
+                  Instagram will open a new tab; the order is copied so you can paste it in DM.
+                </p>
+                <p>WhatsApp opens with the order prefilled. Update the WhatsApp number when ready.</p>
+                {copiedToClipboard && <p className="text-foreground">Order copied. Paste in Instagram DM.</p>}
+              </div>
             </div>
           </div>
         )}
