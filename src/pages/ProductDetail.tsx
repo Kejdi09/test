@@ -132,14 +132,14 @@ const ProductDetail = () => {
             </div>
 
             <p className="font-body text-muted-foreground mb-8 leading-relaxed">
-              {product.description}
+              {product.description || 'No description available'}
             </p>
 
             {/* Size selection */}
             <div className="mb-6">
               <h3 className="font-display text-lg mb-3">Size</h3>
               <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
+                {(product.sizes && product.sizes.length > 0) ? product.sizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -151,7 +151,7 @@ const ProductDetail = () => {
                   >
                     {size}
                   </button>
-                ))}
+                )) : <p className="text-sm text-muted-foreground">One size fits all</p>}
               </div>
             </div>
 
@@ -159,7 +159,7 @@ const ProductDetail = () => {
             <div className="mb-8">
               <h3 className="font-display text-lg mb-3">Color</h3>
               <div className="flex flex-wrap gap-2">
-                {product.colors.map((color) => (
+                {(product.colors && product.colors.length > 0) ? product.colors.map((color) => (
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
@@ -172,7 +172,7 @@ const ProductDetail = () => {
                     {selectedColor === color && <Check className="w-4 h-4" />}
                     {color}
                   </button>
-                ))}
+                )) : <p className="text-sm text-muted-foreground">Standard color</p>}
               </div>
             </div>
 
