@@ -105,7 +105,7 @@ const ProductDetail = () => {
           {/* Image */}
           <div className="aspect-[3/4] overflow-hidden rounded-lg">
             <img
-              src={product.images?.[0]?.url || product.image || 'https://via.placeholder.com/400x600?text=No+Image'}
+              src={apiClient.getImageUrl(product.images?.[0]?.url || product.image)}
               alt={product.name}
               className="w-full h-full object-cover"
             />
@@ -240,10 +240,10 @@ const ProductDetail = () => {
             <h2 className="font-display text-3xl text-foreground mb-8">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((p) => (
-                <Link key={p.id} to={`/product/${p.id}`} className="card-product group">
+                <Link key={p._id || p.id} to={`/product/${p._id || p.id}`} className="card-product group">
                   <div className="aspect-[3/4] overflow-hidden">
                     <img
-                      src={p.image}
+                      src={apiClient.getImageUrl(p.images?.[0]?.url || p.image)}
                       alt={p.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />

@@ -1,14 +1,26 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BASE_URL = API_URL.replace('/api', ''); // Remove /api to get base URL
 
 console.log('API URL:', API_URL);
+console.log('Base URL:', BASE_URL);
 
 class ApiClient {
   baseUrl: string;
+  baseImageUrl: string;
   token: string | null;
 
   constructor() {
     this.baseUrl = API_URL;
+    this.baseImageUrl = BASE_URL;
     this.token = localStorage.getItem('adminToken');
+  }
+
+  // Convert relative image path to absolute URL
+  getImageUrl(imagePath: string | undefined): string {
+    if (!imagePath) return 'https://via.placeholder.com/400x600?text=No+Image';
+    if (imagePath.startsWith('http')) return imagePath; // Already absolute
+    if (imagePath.startsWith('/')) return `${this.baseImageUrl}${imagePath}`; // Make absolute
+    return imagePath; // Return as-is
   }
 
   setToken(token: string | null) {

@@ -3,6 +3,7 @@ import { Heart } from 'lucide-react';
 import { Product } from '@/types/product';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/context/LanguageContext';
+import { apiClient } from '@/lib/api';
 
 interface ProductCardProps {
   product: Product;
@@ -11,7 +12,7 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { t } = useTranslation();
 
-  const productImage = product.images?.[0]?.url || product.image || 'https://via.placeholder.com/400x600?text=No+Image';
+  const productImage = apiClient.getImageUrl(product.images?.[0]?.url || product.image);
   const productId = product._id || product.id;
 
   return (
