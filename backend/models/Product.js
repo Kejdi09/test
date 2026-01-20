@@ -18,7 +18,22 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['dresses', 'tops', 'skirts', 'jackets', 'accessories', 'shoes']
+    enum: [
+      'apparel',
+      't-shirts',
+      'hoodies',
+      'workwear-uniforms',
+      'baby-kids-bodysuits',
+      'home-decor',
+      'embroidered-frames',
+      'kids-frames',
+      'cushions',
+      'wall-decor',
+      'towels',
+      'napkins',
+      'business-embroidery',
+      'business-logo-embroidery'
+    ]
   },
   images: [{
     url: String,
