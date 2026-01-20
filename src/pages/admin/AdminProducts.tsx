@@ -122,9 +122,19 @@ export const AdminProducts: React.FC = () => {
     try {
       const formDataToSend = new FormData();
       
+      // Sanitize description - ensure it's just text, not JSON
+      let description = formData.description.trim();
+      if (description.includes('{') || description.includes('[')) {
+        // Remove JSON-like content
+        description = description.replace(/\{[\s\S]*\}/g, '').trim();
+        if (!description) {
+          description = `Beautiful ${formData.name.toLowerCase()} product`;
+        }
+      }
+      
       const productData = {
         name: formData.name,
-        description: formData.description,
+        description: description,
         price: parseFloat(formData.price),
         category: formData.category,
         colors: formData.colors.split(',').map(c => c.trim()).filter(Boolean),

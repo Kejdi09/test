@@ -88,6 +88,19 @@ router.post('/', authenticate, isAdmin, upload.array('images', 5), async (req, r
     
     const productData = JSON.parse(req.body.data || '{}');
     
+    // Validate description - prevent JSON objects
+    if (productData.description && typeof productData.description === 'string') {
+      if (productData.description.includes('{') || productData.description.includes('[')) {
+        // If description contains JSON-like content, extract just text
+        const match = productData.description.match(/also creat.+?etc/);
+        if (match) {
+          productData.description = match[0];
+        } else {
+          productData.description = productData.description.substring(0, 500);
+        }
+      }
+    }
+    
     // Process uploaded images
     const images = req.files?.map((file, index) => ({
       url: `/uploads/${file.filename}`,
@@ -130,6 +143,19 @@ router.put('/:id', authenticate, isAdmin, upload.array('images', 5), async (req,
     }
 
     const productData = JSON.parse(req.body.data || '{}');
+    
+    // Validate description - prevent JSON objects
+    if (productData.description && typeof productData.description === 'string') {
+      if (productData.description.includes('{') || productData.description.includes('[')) {
+        // If description contains JSON-like content, extract just text
+        const match = productData.description.match(/also creat.+?etc/);
+        if (match) {
+          productData.description = match[0];
+        } else {
+          productData.description = productData.description.substring(0, 500);
+        }
+      }
+    }
     
     // Process new uploaded images
     if (req.files && req.files.length > 0) {
@@ -216,6 +242,49 @@ router.delete('/:id/images/:imageIndex', authenticate, isAdmin, async (req, res)
     res.status(500).json({ 
       success: false, 
       message: 'Failed to delete image' 
+    });
+  }
+});
+
+// Admin: Clean up corrupted products (admin only)
+router.post('/admin/cleanup-corrupted', authenticate, isAdmin, async (req, res) => {
+  try {
+    const products = await Product.find({});
+    let fixed = 0;
+    let deleted = 0;
+
+    for (const product of products) {
+      // Delete products with obviously corrupted names or descriptions
+      if (product.name === 'erererre' || 
+          (product.description && product.description.includes('"success":true'))) {
+        
+        if (product.name === 'erererre') {
+          await Product.deleteOne({ _id: product._id });
+          deleted++;
+        } else {
+          // Fix corrupted description
+          const match = product.description.match(/also creat.+?etc/);
+          if (match) {
+            product.description = match[0];
+          } else {
+            product.description = `Beautiful ${product.name.toLowerCase()} product`;
+          }
+          await product.save();
+          fixed++;
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Cleanup completed',
+      data: { fixed, deleted }
+    });
+  } catch (error) {
+    console.error('Cleanup error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to cleanup products' 
     });
   }
 });
