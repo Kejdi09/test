@@ -8,7 +8,13 @@ import Analytics from './backend/models/Analytics.js';
 
 dotenv.config();
 
-const DATABASE_URL = process.env.DATABASE_URL || 'mongodb://localhost:27017/gjilper-magjike';
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  console.error('❌ ERROR: DATABASE_URL environment variable is not set!');
+  console.error('Please create a .env file with your MongoDB connection string.');
+  process.exit(1);
+}
 
 const sampleProducts = [
   {

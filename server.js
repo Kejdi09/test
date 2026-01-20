@@ -49,7 +49,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // MongoDB Connection
-const DATABASE_URL = process.env.DATABASE_URL || 'mongodb://localhost:27017/gjilper-magjike';
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  console.error('❌ ERROR: DATABASE_URL environment variable is required!');
+  console.error('Please set DATABASE_URL in your .env file or environment variables.');
+  process.exit(1);
+}
 
 mongoose.connect(DATABASE_URL)
   .then(() => {
