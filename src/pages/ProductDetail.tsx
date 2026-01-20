@@ -39,6 +39,7 @@ const ProductDetail = () => {
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading product...</p>
         </div>
       </Layout>
     );
@@ -49,8 +50,9 @@ const ProductDetail = () => {
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center">
           <h1 className="font-display text-3xl mb-4">Product Not Found</h1>
-          <Link to="/shop" className="text-primary hover:underline">
-            Back to Shop
+          <p className="text-muted-foreground mb-6">This product doesn't exist or has been removed.</p>
+          <Link to="/shop" className="text-primary hover:underline font-semibold">
+            ← Back to Shop
           </Link>
         </div>
       </Layout>

@@ -8,12 +8,13 @@ const Admin = () => {
     name: '',
     price: '',
     category: 'dresses',
-    image: '',
     description: '',
     colors: '',
     sizes: '',
     featured: false,
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
@@ -21,11 +22,31 @@ const Admin = () => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const target = e.target as HTMLInputElement;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: target.checked,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -34,6 +55,10 @@ const Admin = () => {
     setMessage('');
 
     try {
+      if (!imageFile) {
+        throw new Error('Please select an image');
+      }
+
       const colorsArray = formData.colors
         .split(',')
         .map((c) => c.trim())
@@ -52,15 +77,11 @@ const Admin = () => {
         sizes: sizesArray,
         featured: formData.featured,
         inStock: true,
-        images: [{
-          url: formData.image,
-          alt: formData.name,
-          isPrimary: true
-        }]
       };
 
       const formDataToSend = new FormData();
       formDataToSend.append('data', JSON.stringify(productData));
+      formDataToSend.append('images', imageFile);
 
       const token = localStorage.getItem('token');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/products`, {
@@ -85,12 +106,13 @@ const Admin = () => {
         name: '',
         price: '',
         category: 'dresses',
-        image: '',
         description: '',
         colors: '',
         sizes: '',
         featured: false,
       });
+      setImageFile(null);
+      setImagePreview('');
     } catch (error) {
       setMessageType('error');
       setMessage(error instanceof Error ? error.message : 'Failed to add product');
@@ -177,21 +199,29 @@ const Admin = () => {
               </select>
             </div>
 
-            {/* Image URL */}
+            {/* Image Upload */}
             <div>
-              <label htmlFor="image" className="block text-sm font-medium mb-2">
-                {t.productImage} (URL) *
+              <label htmlFor="imageFile" className="block text-sm font-medium mb-2">
+                {t.productImage} *
               </label>
               <input
-                type="url"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleInputChange}
+                type="file"
+                id="imageFile"
+                accept="image/*"
+                onChange={handleFileChange}
                 required
-                placeholder="https://example.com/image.jpg"
                 className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
+              {imagePreview && (
+                <div className="mt-3 relative">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-32 h-40 object-cover rounded-lg border border-border"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">Image preview</p>
+                </div>
+              )}
             </div>
 
             {/* Description */}
