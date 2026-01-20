@@ -29,4 +29,5 @@ export interface Category {
   name: string;
   image: string;
   description: string;
+  parent?: string;
 }

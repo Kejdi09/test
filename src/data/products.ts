@@ -18,24 +18,27 @@ const baseProducts = [
   { id: '8', name: 'Business Logo Patch', description: 'Logo embroidery prepared for business gear.', price: 89, image: prayerCream, category: 'business-logo-embroidery', sizes: ['One Size'], colors: ['Cream', 'Black'], inStock: true },
 ];
 
-// Embroidery-focused categories (flat for filtering/navigation)
+// Embroidery-focused categories grouped into three mains with children
 const baseCategories: Category[] = [
+  // Main: Apparel
   { id: 'apparel', name: 'Apparel', description: 'Embroidered apparel essentials', image: abayaBlack },
-  { id: 't-shirts', name: 'T-Shirts', description: 'Embroidered tees', image: hijabRose },
-  { id: 'hoodies', name: 'Hoodies', description: 'Cozy embroidered layers', image: heroAbaya },
-  { id: 'workwear-uniforms', name: 'Workwear Uniforms', description: 'Branded work apparel', image: kaftanSage },
-  { id: 'baby-kids-bodysuits', name: 'Baby & Kids Clothing (Bodysuits)', description: 'Personalized pieces for little ones', image: prayerCream },
+  { id: 't-shirts', name: 'T-Shirts', description: 'Embroidered tees', image: hijabRose, parent: 'apparel' },
+  { id: 'hoodies', name: 'Hoodies', description: 'Cozy embroidered layers', image: heroAbaya, parent: 'apparel' },
+  { id: 'workwear-uniforms', name: 'Workwear Uniforms', description: 'Branded work apparel', image: kaftanSage, parent: 'apparel' },
+  { id: 'baby-kids-bodysuits', name: 'Baby & Kids Clothing (Bodysuits)', description: 'Personalized pieces for little ones', image: prayerCream, parent: 'apparel' },
 
+  // Main: Home & Decor
   { id: 'home-decor', name: 'Home & Decor', description: 'Embroidered decor pieces', image: prayerCream },
-  { id: 'embroidered-frames', name: 'Embroidered Frames', description: 'Framed embroidery art', image: heroAbaya },
-  { id: 'kids-frames', name: 'Kids Frames', description: 'Playful framed pieces', image: hijabRose },
-  { id: 'cushions', name: 'Cushions', description: 'Accent cushions with stitching', image: kaftanSage },
-  { id: 'wall-decor', name: 'Wall Decor', description: 'Textile wall pieces', image: abayaBlack },
-  { id: 'towels', name: 'Towels', description: 'Embroidered towels', image: prayerCream },
-  { id: 'napkins', name: 'Napkins', description: 'Table napkins with embroidery', image: heroAbaya },
+  { id: 'embroidered-frames', name: 'Embroidered Frames', description: 'Framed embroidery art', image: heroAbaya, parent: 'home-decor' },
+  { id: 'kids-frames', name: 'Kids Frames', description: 'Playful framed pieces', image: hijabRose, parent: 'home-decor' },
+  { id: 'cushions', name: 'Cushions', description: 'Accent cushions with stitching', image: kaftanSage, parent: 'home-decor' },
+  { id: 'wall-decor', name: 'Wall Decor', description: 'Textile wall pieces', image: abayaBlack, parent: 'home-decor' },
+  { id: 'towels', name: 'Towels', description: 'Embroidered towels', image: prayerCream, parent: 'home-decor' },
+  { id: 'napkins', name: 'Napkins', description: 'Table napkins with embroidery', image: heroAbaya, parent: 'home-decor' },
 
+  // Main: Business Embroidery
   { id: 'business-embroidery', name: 'Business Embroidery', description: 'Brand-forward embroidery services', image: abayaBlack },
-  { id: 'business-logo-embroidery', name: 'Business Logo Embroidery', description: 'Logo stitching services', image: hijabRose },
+  { id: 'business-logo-embroidery', name: 'Business Logo Embroidery', description: 'Logo stitching services', image: hijabRose, parent: 'business-embroidery' },
 ];
 
 export const useTranslatedProducts = (): Product[] => {

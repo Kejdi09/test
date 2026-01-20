@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/product/ProductCard';
 import { useTranslatedCategories } from '@/data/products';
+import { Category } from '@/types/product';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +17,13 @@ const Shop = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const categories = useTranslatedCategories();
+  const mainCategories = categories.filter((category) => !category.parent);
+  const subcategoriesByParent = categories.reduce<Record<string, Category[]>>((acc, category) => {
+    if (!category.parent) return acc;
+    acc[category.parent] = acc[category.parent] || [];
+    acc[category.parent].push(category);
+    return acc;
+  }, {});
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 300]);
@@ -42,7 +50,13 @@ const Shop = () => {
   const filteredProducts = useMemo(() => {
     let filtered = [...products];
     if (selectedCategory) {
-      filtered = filtered.filter((p) => p.category === selectedCategory);
+      const selectedMain = mainCategories.find((c) => c.id === selectedCategory);
+      if (selectedMain) {
+        const childIds = subcategoriesByParent[selectedMain.id]?.map((c) => c.id) || [];
+        filtered = filtered.filter((p) => p.category === selectedMain.id || childIds.includes(p.category));
+      } else {
+        filtered = filtered.filter((p) => p.category === selectedCategory);
+      }
     }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
@@ -60,7 +74,7 @@ const Shop = () => {
       default: filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
     return filtered;
-  }, [selectedCategory, priceRange, sortBy, products]);
+  }, [selectedCategory, priceRange, sortBy, products, mainCategories, subcategoriesByParent, searchTerm]);
 
   if (isLoading) {
     return (
@@ -92,12 +106,31 @@ const Shop = () => {
             {selectedCategory ? categories.find((c) => c.id === selectedCategory)?.name : t.shopAll}
           </h1>
           <p className="font-body text-muted-foreground max-w-xl mx-auto">{t.shopDescription}</p>
-        </div>
-      </section>
-
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="hidden lg:block w-64 flex-shrink-0">
+                <div className="space-y-3">
+                  <button onClick={() => handleCategoryChange('all')} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{t.allProducts}</button>
+                  {mainCategories.map((main) => {
+                    const children = subcategoriesByParent[main.id] || [];
+                    const isMainActive = selectedCategory === main.id || children.some((child) => child.id === selectedCategory);
+                    return (
+                      <div key={main.id} className="space-y-1">
+                        <button onClick={() => handleCategoryChange(main.id)} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${isMainActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{main.name}</button>
+                        {children.length > 0 && (
+                          <div className="pl-3 space-y-1">
+                            {children.map((child) => (
+                              <button
+                                key={child.id}
+                                onClick={() => handleCategoryChange(child.id)}
+                                className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${selectedCategory === child.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+                              >
+                                {child.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
             <div className="sticky top-24 space-y-8">
               <div>
                 <h3 className="font-display text-lg mb-4">{t.categories}</h3>
@@ -160,9 +193,30 @@ const Shop = () => {
             <div className="space-y-8">
               <div>
                 <h3 className="font-display text-lg mb-4">{t.categories}</h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <button onClick={() => { handleCategoryChange('all'); setShowFilters(false); }} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{t.allProducts}</button>
-                  {categories.map((category) => (<button key={category.id} onClick={() => { handleCategoryChange(category.id); setShowFilters(false); }} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${selectedCategory === category.id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{category.name}</button>))}
+                  {mainCategories.map((main) => {
+                    const children = subcategoriesByParent[main.id] || [];
+                    const isMainActive = selectedCategory === main.id || children.some((child) => child.id === selectedCategory);
+                    return (
+                      <div key={main.id} className="space-y-1">
+                        <button onClick={() => { handleCategoryChange(main.id); setShowFilters(false); }} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${isMainActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{main.name}</button>
+                        {children.length > 0 && (
+                          <div className="pl-3 space-y-1">
+                            {children.map((child) => (
+                              <button
+                                key={child.id}
+                                onClick={() => { handleCategoryChange(child.id); setShowFilters(false); }}
+                                className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${selectedCategory === child.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+                              >
+                                {child.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               <div>

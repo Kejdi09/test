@@ -59,8 +59,6 @@ const Footer = () => {
             <ul className="space-y-3 font-body text-sm">
               <li><Link to="/shop" className="text-background/70 hover:text-accent transition-colors">{t.shopAll}</Link></li>
               <li><Link to="/shop?category=apparel" className="text-background/70 hover:text-accent transition-colors">{t.apparel}</Link></li>
-              <li><Link to="/shop?category=t-shirts" className="text-background/70 hover:text-accent transition-colors">{t.tShirts}</Link></li>
-              <li><Link to="/shop?category=hoodies" className="text-background/70 hover:text-accent transition-colors">{t.hoodies}</Link></li>
               <li><Link to="/shop?category=home-decor" className="text-background/70 hover:text-accent transition-colors">{t.homeDecor}</Link></li>
               <li><Link to="/shop?category=business-embroidery" className="text-background/70 hover:text-accent transition-colors">{t.businessEmbroidery}</Link></li>
             </ul>

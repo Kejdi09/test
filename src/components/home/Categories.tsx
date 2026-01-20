@@ -4,7 +4,7 @@ import { useTranslatedCategories } from '@/data/products';
 
 const Categories = () => {
   const { t } = useTranslation();
-  const categories = useTranslatedCategories();
+  const categories = useTranslatedCategories().filter((category) => !category.parent);
 
   return (
     <section className="py-20 bg-muted/30">
@@ -18,7 +18,7 @@ const Categories = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {categories.map((category, index) => (
             <Link
               key={category.id}
