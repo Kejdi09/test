@@ -14,6 +14,7 @@ const FeaturedProducts = () => {
     const fetchProducts = async () => {
       try {
         const response = await apiClient.getProducts({ featured: 'true', limit: '8' });
+        console.log('Featured products fetched:', response.data.products);
         setFeaturedProducts(response.data.products || []);
       } catch (error) {
         console.error('Failed to fetch featured products:', error);
