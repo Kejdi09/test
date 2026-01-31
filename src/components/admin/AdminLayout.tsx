@@ -18,12 +18,8 @@ interface AdminLayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
-  { name: 'Website Images', href: '/admin/website-images', icon: Image },
-  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {

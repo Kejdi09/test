@@ -77,10 +77,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-background/60 font-body">
             <p>© 2026 Gjilpera Magjike. {t.allRightsReserved}</p>
-            <div className="flex gap-6">
-              <Link to="/privacy" className="hover:text-accent transition-colors">{t.privacyPolicy}</Link>
-              <Link to="/terms" className="hover:text-accent transition-colors">{t.termsService}</Link>
-            </div>
+            {/* Privacy Policy and Terms links removed */}
           </div>
         </div>
       </div>
