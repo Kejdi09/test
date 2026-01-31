@@ -114,7 +114,6 @@ const CartContent = () => {
                           <button
                             onClick={() => {
                               removeFromCart({ id: itemId, selectedSize: item.selectedSize, selectedColor: item.selectedColor });
-                              setTimeout(() => forceRerender((n) => n + 1), 0);
                             }}
                             className="p-1 hover:text-destructive transition-colors"
                             aria-label="Remove item"
