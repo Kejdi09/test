@@ -8,10 +8,10 @@ const router = express.Router();
 // Register admin user
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, name } = req.body;
+    const { username, email, password, name } = req.body;
 
-    // Check if user exists
-    const existingUser = await User.findOne({ username });
+    // Check if user exists by username or email
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -22,6 +22,7 @@ router.post('/register', async (req, res) => {
     // Create new user
     const user = new User({
       username,
+      email,
       password,
       name,
       role: 'admin'
@@ -57,14 +58,17 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, email, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ username });
+    // Find user by username or email
+    const user = await User.findOne({ $or: [
+      username ? { username } : {},
+      email ? { email } : {}
+    ] });
     if (!user) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Invalid username or password' 
+        message: 'Invalid credentials' 
       });
     }
 
@@ -73,7 +77,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Invalid username or password' 
+        message: 'Invalid credentials' 
       });
     }
 
