@@ -249,7 +249,6 @@ async function populateDatabase() {
     console.log('\nCreating admin user...');
     const adminUser = new User({
       username: 'admin',
-      email: 'admin@gjilper-magjike.com',
       password: 'admin123',
       name: 'Admin User',
       role: 'admin'

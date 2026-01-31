@@ -8,10 +8,10 @@ const router = express.Router();
 // Register admin user
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, password, name } = req.body;
+    const { username, password, name } = req.body;
 
-    // Check if user exists by username or email
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    // Check if user exists by username
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -22,7 +22,6 @@ router.post('/register', async (req, res) => {
     // Create new user
     const user = new User({
       username,
-      email,
       password,
       name,
       role: 'admin'
@@ -58,13 +57,10 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
 
-    // Find user by username or email
-    const user = await User.findOne({ $or: [
-      username ? { username } : {},
-      email ? { email } : {}
-    ] });
+    // Find user by username
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({ 
         success: false, 
