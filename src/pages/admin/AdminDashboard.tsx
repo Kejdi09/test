@@ -67,7 +67,8 @@ export const AdminDashboard: React.FC = () => {
       setStats(response.data);
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error);
-    } finally {
+    // Only render 'products' and 'messages' categories/features for admin
+    const allowedCategories = ['products', 'messages'];
       setIsLoading(false);
     }
   };

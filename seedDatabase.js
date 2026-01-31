@@ -236,69 +236,28 @@ async function populateDatabase() {
     await mongoose.connect(DATABASE_URL);
     console.log('Connected to MongoDB');
 
-    // Clear existing data
-    console.log('\nClearing existing data...');
-    await User.deleteMany({});
-    await Product.deleteMany({});
-    await Message.deleteMany({});
-    await WebsiteImage.deleteMany({});
-    await Analytics.deleteMany({});
-    console.log('Existing data cleared');
-
-    // Create admin user
-    console.log('\nCreating admin user...');
-    const adminUser = new User({
+    // Upsert admin user only
+    console.log('\nUpserting admin user...');
+    const adminData = {
       username: 'admin',
       password: 'admin123',
       name: 'Admin User',
       role: 'admin'
-    });
-    await adminUser.save();
-    console.log('Admin user created:');
-    console.log('  Email: admin@gjilper-magjike.com');
-    console.log('  Password: admin123');
-
-    // Create products
-    console.log('\nCreating sample products...');
-    const products = await Product.insertMany(sampleProducts);
-    console.log(`${products.length} products created`);
-
-    // Create messages
-    console.log('\nCreating sample messages...');
-    const messages = await Message.insertMany(sampleMessages);
-    console.log(`${messages.length} messages created`);
-
-    // Create website images
-    console.log('\nCreating website images...');
-    const websiteImages = await WebsiteImage.insertMany(sampleWebsiteImages);
-    console.log(`${websiteImages.length} website images created`);
-
-    // Create analytics data for the last 30 days
-    console.log('\nCreating analytics data...');
-    const analyticsData = [];
-    for (let i = 0; i < 30; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-
-      analyticsData.push({
-        date,
-        pageViews: Math.floor(Math.random() * 500) + 200,
-        uniqueVisitors: Math.floor(Math.random() * 200) + 100,
-        sales: Math.floor(Math.random() * 20) + 5,
-        revenue: (Math.random() * 1000 + 200).toFixed(2),
-        newUsers: Math.floor(Math.random() * 10) + 2
-      });
+    };
+    const existingAdmin = await User.findOne({ username: 'admin' });
+    if (existingAdmin) {
+      existingAdmin.password = adminData.password;
+      existingAdmin.name = adminData.name;
+      existingAdmin.role = adminData.role;
+      await existingAdmin.save();
+      console.log('Admin user updated:');
+    } else {
+      const adminUser = new User(adminData);
+      await adminUser.save();
+      console.log('Admin user created:');
     }
-    await Analytics.insertMany(analyticsData);
-    console.log('Analytics data created for the last 30 days');
-
-    console.log('\n✅ Database populated successfully!');
-    console.log('\nYou can now:');
-    console.log('1. Start the server: npm run dev (or node server.js)');
-    console.log('2. Login to admin dashboard with:');
-    console.log('   Email: admin@gjilper-magjike.com');
-    console.log('   Password: admin123');
+    console.log('  Username: admin');
+    console.log('  Password: admin123');
 
     mongoose.disconnect();
   } catch (error) {
