@@ -1,0 +1,257 @@
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import ProductCard from '@/components/product/ProductCard';
+import { useTranslatedCategories } from '@/data/products';
+import { Category } from '@/types/product';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Filter, X } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
+import { apiClient } from '@/lib/api';
+
+const Shop = () => {
+  const { t } = useTranslation();
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const categories = useTranslatedCategories();
+  const mainCategories = categories.filter((category) => !category.parent);
+  const subcategoriesByParent = categories.reduce<Record<string, Category[]>>((acc, category) => {
+    if (!category.parent) return acc;
+    acc[category.parent] = acc[category.parent] || [];
+    acc[category.parent].push(category);
+    return acc;
+  }, {});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showFilters, setShowFilters] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(300);
+  const [sortBy, setSortBy] = useState('featured');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const selectedCategory = searchParams.get('category') || '';
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.getProducts({ limit: '100' });
+        setProducts(response.data.products || []);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    let filtered = [...products];
+    if (selectedCategory) {
+      const selectedMain = mainCategories.find((c) => c.id === selectedCategory);
+      if (selectedMain) {
+        const childIds = subcategoriesByParent[selectedMain.id]?.map((c) => c.id) || [];
+        filtered = filtered.filter((p) => p.category === selectedMain.id || childIds.includes(p.category));
+      } else {
+        filtered = filtered.filter((p) => p.category === selectedCategory);
+      }
+    }
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) =>
+        (p.name || '').toLowerCase().includes(term) ||
+        (p.description || '').toLowerCase().includes(term) ||
+        (p.category || '').toLowerCase().includes(term)
+      );
+    }
+    filtered = filtered.filter((p) => p.price <= maxPrice);
+    switch (sortBy) {
+      case 'price-low': filtered.sort((a, b) => a.price - b.price); break;
+      case 'price-high': filtered.sort((a, b) => b.price - a.price); break;
+      case 'newest': filtered.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()); break;
+      default: filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    }
+    return filtered;
+  }, [selectedCategory, maxPrice, sortBy, products, mainCategories, subcategoriesByParent, searchTerm]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <section className="bg-sage-light py-16">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="font-display text-4xl md:text-5xl text-foreground mb-4">{t.shopAll}</h1>
+          </div>
+        </section>
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const handleCategoryChange = (category: string) => {
+    if (category === 'all') { searchParams.delete('category'); } else { searchParams.set('category', category); }
+    setSearchParams(searchParams);
+  };
+
+  return (
+    <Layout>
+      <section className="bg-sage-light py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="font-display text-4xl md:text-5xl text-foreground mb-4">
+            {selectedCategory ? categories.find((c) => c.id === selectedCategory)?.name : t.shopAll}
+          </h1>
+          <p className="font-body text-muted-foreground max-w-xl mx-auto">{t.shopDescription}</p>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          <aside className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-24 space-y-8">
+              <div>
+                <h3 className="font-display text-lg mb-4">{t.categories}</h3>
+                <div className="space-y-3">
+                  <button onClick={() => handleCategoryChange('all')} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{t.allProducts}</button>
+                  {mainCategories.map((main) => {
+                    const children = subcategoriesByParent[main.id] || [];
+                    const isMainActive = selectedCategory === main.id || children.some((child) => child.id === selectedCategory);
+                    return (
+                      <div key={main.id} className="space-y-1">
+                        <button onClick={() => handleCategoryChange(main.id)} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${isMainActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{main.name}</button>
+                        {children.length > 0 && (
+                          <div className="pl-3 space-y-1">
+                            {children.map((child) => (
+                              <button
+                                key={child.id}
+                                onClick={() => handleCategoryChange(child.id)}
+                                className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${selectedCategory === child.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+                              >
+                                {child.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <h3 className="font-display text-lg mb-4">{t.priceRange}</h3>
+                <Slider value={[maxPrice]} onValueChange={([v]) => setMaxPrice(v)} min={0} max={300} step={10} className="mb-4" />
+                <div className="flex justify-end font-body text-sm text-muted-foreground"><span>{maxPrice}€</span></div>
+              </div>
+            </div>
+          </aside>
+
+          <div className="flex-1">
+            <div className="flex flex-col gap-4 mb-8 pb-4 border-b border-border">
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                <p className="font-body text-sm text-muted-foreground">{t.showingProducts.replace('{count}', String(filteredProducts.length))}</p>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <Input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder={t.search || 'Search products'}
+                    className="w-full sm:w-64"
+                  />
+                  <button className="lg:hidden flex items-center gap-2 font-body text-sm" onClick={() => setShowFilters(true)}><Filter className="w-4 h-4" />{t.filters}</button>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="featured">{t.featured}</SelectItem>
+                      <SelectItem value="newest">{t.newest}</SelectItem>
+                      <SelectItem value="price-low">{t.priceLowHigh}</SelectItem>
+                      <SelectItem value="price-high">{t.priceHighLow}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {filteredProducts.length > 0 ? (
+              <>
+                {/* Mobile: Horizontal scroll carousel */}
+                <div className="md:hidden flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product._id || product.id}
+                      className="flex-shrink-0 w-[calc(100vw-2rem)] sm:w-[220px] snap-start"
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop: Grid layout */}
+                <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((product, index) => (
+                    <div
+                      key={product._id || product.id}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-16"><p className="font-display text-2xl text-foreground mb-2">{t.noProductsFound}</p><p className="font-body text-muted-foreground">{t.tryAdjustingFilters}</p></div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showFilters && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-foreground/50" onClick={() => setShowFilters(false)} />
+          <div className="absolute right-0 top-0 bottom-0 w-80 bg-background p-6 overflow-y-auto animate-slide-up">
+            <div className="flex items-center justify-between mb-6"><h2 className="font-display text-xl">{t.filters}</h2><button onClick={() => setShowFilters(false)}><X className="w-6 h-6" /></button></div>
+            <div className="space-y-8">
+              <div>
+                <h3 className="font-display text-lg mb-4">{t.categories}</h3>
+                <div className="space-y-3">
+                  <button onClick={() => { handleCategoryChange('all'); setShowFilters(false); }} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{t.allProducts}</button>
+                  {mainCategories.map((main) => {
+                    const children = subcategoriesByParent[main.id] || [];
+                    const isMainActive = selectedCategory === main.id || children.some((child) => child.id === selectedCategory);
+                    return (
+                      <div key={main.id} className="space-y-1">
+                        <button onClick={() => { handleCategoryChange(main.id); setShowFilters(false); }} className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${isMainActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>{main.name}</button>
+                        {children.length > 0 && (
+                          <div className="pl-3 space-y-1">
+                            {children.map((child) => (
+                              <button
+                                key={child.id}
+                                onClick={() => { handleCategoryChange(child.id); setShowFilters(false); }}
+                                className={`block w-full text-left py-2 px-3 rounded font-body text-sm transition-colors ${selectedCategory === child.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+                              >
+                                {child.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <h3 className="font-display text-lg mb-4">{t.priceRange}</h3>
+                <Slider value={[maxPrice]} onValueChange={([v]) => setMaxPrice(v)} min={0} max={300} step={10} className="mb-4" />
+                <div className="flex justify-end font-body text-sm text-muted-foreground"><span>{maxPrice}€</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </Layout>
+  );
+};
+
+export default Shop;
