@@ -49,30 +49,35 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (itemToRemove: RemoveCartItem) => {
-    setItems((prev) =>
-      prev.filter(
-        (item) =>
-          !(
-            String(item.id) === String(itemToRemove.id) &&
-            item.selectedSize === itemToRemove.selectedSize &&
-            item.selectedColor === itemToRemove.selectedColor
-          )
-      )
-    );
-  };
+  setItems((prev) =>
+    prev.filter(
+      (item) =>
+        !(
+          String(item.id) === String(itemToRemove.id) &&
+          item.selectedSize === itemToRemove.selectedSize &&
+          item.selectedColor === itemToRemove.selectedColor
+        )
+    )
+  );
+};
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    setItems((prev) => {
-      if (quantity <= 0) {
-        return prev.filter((item) => String(item.id) !== String(productId));
-      }
-      return prev.map((item) =>
-        String(item.id) === String(productId)
-          ? { ...item, quantity }
-          : item
-      );
-    });
-  };
+ const updateQuantity = (productId: string, quantity: number, selectedSize?: string, selectedColor?: string) => {
+  setItems((prev) => {
+    return prev
+      .map((item) => {
+        if (
+          String(item.id) === String(productId) &&
+          (!selectedSize || item.selectedSize === selectedSize) &&
+          (!selectedColor || item.selectedColor === selectedColor)
+        ) {
+          return { ...item, quantity };
+        }
+        return item;
+      })
+      .filter((item) => item.quantity > 0);
+  });
+};
+
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
