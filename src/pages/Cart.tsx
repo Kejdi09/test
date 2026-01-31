@@ -29,6 +29,7 @@ const CartContent = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const { items, removeFromCart, updateQuantity, totalPrice } = useCart();
+  const [_, forceRerender] = useState(0);
 
   if (items.length === 0) {
     return (
@@ -111,7 +112,10 @@ const CartContent = () => {
                             </p>
                           </div>
                           <button
-                            onClick={() => removeFromCart({ id: itemId, selectedSize: item.selectedSize, selectedColor: item.selectedColor })}
+                            onClick={() => {
+                              removeFromCart({ id: itemId, selectedSize: item.selectedSize, selectedColor: item.selectedColor });
+                              setTimeout(() => forceRerender((n) => n + 1), 0);
+                            }}
                             className="p-1 hover:text-destructive transition-colors"
                             aria-label="Remove item"
                           >
